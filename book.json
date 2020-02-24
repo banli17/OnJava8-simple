@@ -1,0 +1,31 @@
+{
+  "title": "《On Java 8》中文版",
+  "author": "LingCoder",
+  "description": "根据 Bruce Eckel 大神的新书 On Java 8 翻译，可以说是事实上的 Thinking in Java 5th",
+  "language": "zh-hans", 
+  "gitbook": "3.2.3", 
+  "styles": {
+    "website": "styles/website.css",
+    "ebook": "styles/ebook.css",
+    "pdf": "styles/pdf.css",
+    "mobi": "styles/mobi.css",
+    "epub": "styles/epub.css"
+ },
+  "plugins": [ 
+    "splitter",
+	"edit-link",
+	"search-pro",
+	"emphasize",
+	"toggle-chapters",
+	"katex",
+	"mermaid-gb3",
+	"advanced-emoji",
+	"include-codeblock"
+  ],
+  "pluginsConfig": {
+	"edit-link": {
+                "base": "https://github.com/lingcoder/OnJava8/edit/master",
+                "label": "Edit This Page"
+            }
+  }
+}
