@@ -27,7 +27,7 @@
 - [x] [第一章 对象的概念](docs/book/01-What-is-an-Object.md)
 - [x] [第二章 安装Java和本书用例](docs/book/02-Installing-Java-and-the-Book-Examples.md)
 - [x] [第三章 万物皆对象](docs/book/03-Objects-Everywhere.md)
-- [ ] [第四章 运算符](docs/book/04-Operators.md)
+- [x] [第四章 运算符](docs/book/04-Operators.md)
 - [ ] [第五章 控制流](docs/book/05-Control-Flow.md)
 - [ ] [第六章 初始化和清理](docs/book/06-Housekeeping.md) 
 - [ ] [第七章 封装](docs/book/07-Implementation-Hiding.md) 
