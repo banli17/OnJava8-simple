@@ -487,7 +487,7 @@ java HelloDate
 
 ## 编码风格
 
-Java 编码规范要求类名的首字母大写。多个单词则采用驼峰命名法，例如：
+Java 编码规范要求类名的首字母大写。多个单词则采用驼峰法，例如：
 
 ```java
 class AllTheColorsOfTheRainbow {
@@ -495,7 +495,7 @@ class AllTheColorsOfTheRainbow {
 }
 ```
 
-对于方法、字段（成员变量）和变量名都采用驼峰命名的方式，但是首字母不需要大写。代码示例：
+对于方法、字段（成员变量）和变量名都采用驼峰法，但首字母不需要大写。示例：
 
 ```java
 class AllTheColorsOfTheRainbow {
