@@ -1,50 +1,38 @@
-[TOC]
-
-<!-- Inner Classes -->
-
 # 第十一章 内部类
 
-> 一个定义在另一个类中的类，叫作内部类。
+> 定义在类中的类，叫作内部类。
 
-内部类是一种非常有用的特性，因为它允许你把一些逻辑相关的类组织在一起，并控制位于内部的类的可见性。然而必须要了解，内部类与组合是完全不同的概念，这一点很重要。在最初，内部类看起来就像是一种代码隐藏机制：将类置于其他类的内部。但是，你将会了解到，内部类远不止如此，它了解外围类，并能与之通信，而且你用内部类写出的代码更加优雅而清晰，尽管并不总是这样（而且 Java 8 的 Lambda 表达式和方法引用减少了编写内部类的需求）。
+内部类是一种非常有用的特性，因为它允许你把一些逻辑相关的类组织在一起，并控制内部类的可见性。
 
-最初，内部类可能看起来有些奇怪，而且要花些时间才能在设计中轻松地使用它们。对内部类的需求并非总是很明显的，但是在描述完内部类的基本语法与语义之后，"Why inner classes?"就应该使得内部类的益处明确显现了。
-
-本章剩余部分包含了对内部类语法更加详尽的探索，这些特性是为了语言的完备性而设计的，但是你也许不需要使用它们，至少一开始不需要。因此，本章最初的部分也许就是你现在所需的全部，你可以将更详尽的探索当作参考资料。
-
-
-<!-- Creating Inner Classes -->
 ## 创建内部类
 
-创建内部类的方式就如同你想的一样——把类的定义置于外围类的里面：
+创建内部类的方式就是把类的定义置于外围类的里面：
 
 ```java
 // innerclasses/Parcel1.java
-// Creating inner classes
 public class Parcel1 {
     class Contents {
         private int i = 11;
-      
+
         public int value() { return i; }
     }
-  
+
     class Destination {
         private String label;
-      
+
         Destination(String whereTo) {
             label = whereTo;
         }
-      
+
         String readLabel() { return label; }
     }
-    // Using inner classes looks just like
-    // using any other class, within Parcel1:
+    // 使用内部类 Destination
     public void ship(String dest) {
         Contents c = new Contents();
         Destination d = new Destination(dest);
         System.out.println(d.readLabel());
     }
-  
+
     public static void main(String[] args) {
         Parcel1 p = new Parcel1();
         p.ship("Tasmania");
@@ -58,44 +46,44 @@ public class Parcel1 {
 Tasmania
 ```
 
-当我们在 `ship()` 方法里面使用内部类的时候，与使用普通类没什么不同。在这里，明显的区别只是内部类的名字是嵌套在 **Parcel1** 里面的。
+当我们在 `ship()` 方法里面使用内部类与使用普通类一样。在这里，区别只是内部类的名字嵌套在 **Parcel1** 里面。
 
-更典型的情况是，外部类将有一个方法，该方法返回一个指向内部类的引用，就像在 `to()` 和 `contents()` 方法中看到的那样：
+更典型的用法是返回内部类的引用，就像在 `to()` 和 `contents()` 方法中看到的那样：
 
 ```java
 // innerclasses/Parcel2.java
-// Returning a reference to an inner class
+// 返回内部类的引用
 public class Parcel2 {
     class Contents {
         private int i = 11;
-      
+
         public int value() { return i; }
     }
-  
+
     class Destination {
         private String label;
-      
+
         Destination(String whereTo) {
             label = whereTo;
         }
-      
+
         String readLabel() { return label; }
     }
-  
+
     public Destination to(String s) {
         return new Destination(s);
     }
-  
+
     public Contents contents() {
         return new Contents();
     }
-  
+
     public void ship(String dest) {
         Contents c = contents();
         Destination d = to(dest);
         System.out.println(d.readLabel());
     }
-  
+
     public static void main(String[] args) {
         Parcel2 p = new Parcel2();
         p.ship("Tasmania");
@@ -113,17 +101,14 @@ public class Parcel2 {
 Tasmania
 ```
 
-如果想从外部类的非静态方法之外的任意位置创建某个内部类的对象，那么必须像在 `main()` 方法中那样，具体地指明这个对象的类型：*OuterClassName.InnerClassName*。(译者注：在外部类的静态方法中也可以直接指明类型 *InnerClassName*，在其他类中需要指明 *OuterClassName.InnerClassName*。)
-
-<!-- The Link to the Outer Class -->
+如果想从外部类的静态方法里创建某个内部类的对象，如 `main()` 方法中那样，必须指明对象的类型：_OuterClassName.InnerClassName_。(译者注：在外部类的静态方法中也可以直接指明类型 _InnerClassName_，在其他类中需要指明 _OuterClassName.InnerClassName_。)
 
 ## 链接外部类
 
-到目前为止，内部类似乎还只是一种名字隐藏和组织代码的模式。这些是很有用，但还不是最引人注目的，它还有其他的用途。当生成一个内部类的对象时，此对象与制造它的外围对象（enclosing object）之间就有了一种联系，所以它能访问其外围对象的所有成员，而不需要任何特殊条件。此外，内部类还拥有其外围类的所有元素的访问权。
+到目前为止，内部类似乎还只是一种名字隐藏和组织代码的模式。它还有其他的用途。当创建内部类对象时，此对象与外围对象（enclosing object）之间就有了一种联系，所以它能访问外围对象的所有成员，而不需要任何特殊条件。此外，内部类还拥有外围类的所有元素的访问权。
 
 ```java
 // innerclasses/Sequence.java
-// Holds a sequence of Objects
 interface Selector {
     boolean end();
     Object current();
@@ -177,26 +162,25 @@ public class Sequence {
 
 所以内部类自动拥有对其外围类所有成员的访问权。这是如何做到的呢？当某个外围类的对象创建了一个内部类对象时，此内部类对象必定会秘密地捕获一个指向那个外围类对象的引用。然后，在你访问此外围类的成员时，就是用那个引用来选择外围类的成员。幸运的是，编译器会帮你处理所有的细节，但你现在可以看到：内部类的对象只能在与其外围类的对象相关联的情况下才能被创建（就像你应该看到的，内部类是非 **static** 类时）。构建内部类对象时，需要一个指向其外围类对象的引用，如果编译器访问不到这个引用就会报错。不过绝大多数时候这都无需程序员操心。
 
-<!-- Using .this and .new -->
 ## 使用 .this 和 .new
 
-如果你需要生成对外部类对象的引用，可以使用外部类的名字后面紧跟圆点和 **this**。这样产生的引用自动地具有正确的类型，这一点在编译期就被知晓并受到检查，因此没有任何运行时开销。下面的示例展示了如何使用 **.this**：
+如果你需要创建外部类对象的引用，可以使用 **\_OuterClassName.this**。这样产生的引用自动地具有正确的类型，这一点在编译期就被检查，因此没有任何运行时开销。下面的示例展示了如何使用 **.this**：
 
 ```java
 // innerclasses/DotThis.java
 // Accessing the outer-class object
 public class DotThis {
     void f() { System.out.println("DotThis.f()"); }
-  
+
     public class Inner {
         public DotThis outer() {
             return DotThis.this;
             // A plain "this" would be Inner's "this"
         }
     }
-  
+
     public Inner inner() { return new Inner(); }
-  
+
     public static void main(String[] args) {
         DotThis dt = new DotThis();
         DotThis.Inner dti = dt.inner();
@@ -255,11 +239,9 @@ public class Parcel3 {
 
 在拥有外部类对象之前是不可能创建内部类对象的。这是因为内部类对象会暗暗地连接到建它的外部类对象上。但是，如果你创建的是嵌套类（静态内部类），那么它就不需要对外部类对象的引用。
 
-<!-- Inner Classes and Upcasting -->
-
 ## 内部类与向上转型
 
-当将内部类向上转型为其基类，尤其是转型为一个接口的时候，内部类就有了用武之地。（从实现了某个接口的对象，得到对此接口的引用，与向上转型为这个对象的基类，实质上效果是一样的。）这是因为此内部类-某个接口的实现-能够完全不可见，并且不可用。所得到的只是指向基类或接口的引用，所以能够很方便地隐藏实现细节。
+当将内部类向上转型为基类，尤其是转型为一个接口的时候，内部类就有了用武之地。（从实现了某个接口的对象，得到对此接口的引用，与向上转型为这个对象的基类，实质上效果是一样的。）这是因为此内部类-某个接口的实现-能够完全不可见，并且不可用。所得到的只是指向基类或接口的引用，所以能够很方便地隐藏实现细节。
 
 我们可以创建前一个示例的接口：
 
@@ -350,17 +332,17 @@ public class Parcel5 {
     public Destination destination(String s) {
         final class PDestination implements Destination {
             private String label;
-          
+
             private PDestination(String whereTo) {
                 label = whereTo;
             }
-          
+
             @Override
             public String readLabel() { return label; }
         }
         return new PDestination(s);
     }
-  
+
     public static void main(String[] args) {
         Parcel5 p = new Parcel5();
         Destination d = p.destination("Tasmania");
@@ -416,12 +398,12 @@ public class Parcel7 {
     public Contents contents() {
         return new Contents() { // Insert class definition
             private int i = 11;
-          
+
             @Override
             public int value() { return i; }
         }; // Semicolon required
     }
-  
+
     public static void main(String[] args) {
         Parcel7 p = new Parcel7();
         Contents c = p.contents();
@@ -442,11 +424,11 @@ public class Parcel7b {
         @Override
         public int value() { return i; }
     }
-  
+
     public Contents contents() {
         return new MyContents();
     }
-  
+
     public static void main(String[] args) {
         Parcel7b p = new Parcel7b();
         Contents c = p.contents();
@@ -476,8 +458,8 @@ public class Parcel8 {
 }
 ```
 
-- \[1\] 将合适的参数传递给基类的构造器。
-- \[2\] 在匿名内部类末尾的分号，并不是用来标记此内部类结束的。实际上，它标记的是表达式的结束，只不过这个表达式正巧包含了匿名内部类罢了。因此，这与别的地方使用的分号是一致的。
+-   \[1\] 将合适的参数传递给基类的构造器。
+-   \[2\] 在匿名内部类末尾的分号，并不是用来标记此内部类结束的。实际上，它标记的是表达式的结束，只不过这个表达式正巧包含了匿名内部类罢了。因此，这与别的地方使用的分号是一致的。
 
 尽管 **Wrapping** 只是一个具有具体实现的普通类，但它还是被导出类当作公共“接口”来使用。
 
@@ -698,7 +680,7 @@ public class TestBed {
 f()
 ```
 
-这生成了一个独立的类 **TestBed$Tester**（要运行这个程序，执行 **java TestBed$Tester**，在 Unix/Linux 系统中需要转义 **$**）。你可以使用这个类测试，但是不必在发布的产品中包含它，可以在打包产品前删除 **TestBed$Tester.class**。
+这生成了一个独立的类 **TestBed\$Tester**（要运行这个程序，执行 **java TestBed\$Tester**，在 Unix/Linux 系统中需要转义 **\$**）。你可以使用这个类测试，但是不必在发布的产品中包含它，可以在打包产品前删除 **TestBed\$Tester.class**。
 
 ### 从多层嵌套类中访问外部类的成员
 
@@ -793,14 +775,14 @@ abstract class E {}
 
 class Z extends D {
     E makeE() {
-      return new E() {};  
+      return new E() {};
     }
 }
 
 public class MultiImplementation {
     static void takesD(D d) {}
     static void takesE(E e) {}
-    
+
     public static void main(String[] args) {
         Z z = new Z();
         takesD(z);
@@ -813,7 +795,7 @@ public class MultiImplementation {
 
 1. 内部类可以有多个实例，每个实例都有自己的状态信息，并且与其外围类对象的信息相互独立。
 2. 在单个外围类中，可以让多个内部类以不同的方式实现同一个接口，或继承同一个类。
-稍后就会展示一个这样的例子。
+   稍后就会展示一个这样的例子。
 3. 创建内部类对象的时刻并不依赖于外围类对象的创建
 4. 内部类并没有令人迷惑的"is-a”关系，它就是一个独立的实体。
 
@@ -823,7 +805,7 @@ public class MultiImplementation {
 
 闭包（**closure**）是一个可调用的对象，它记录了一些信息，这些信息来自于创建它的作用域。通过这个定义，可以看出内部类是面向对象的闭包，因为它不仅包含外围类对象（创建内部类的作用域）的信息，还自动拥有一个指向此外围类对象的引用，在此作用域内，内部类有权操作所有的成员，包括 **private** 成员。
 
-在 Java 8 之前，生成闭包行为的唯一方式就是内部类。在 Java 8 之后，我们可以使用 lambda  表达式来生成闭包行为，并且语法更加精细和简洁；你将会在 [函数式编程 ]() 这一章节中学习相关细节。即使应该优先使用 lambda 表达式用于内部类闭包，你依旧会看到那些 Java 8 以前的代码，即使用内部类来表示闭包的方式，所以非常有必要来理解这种形式。
+在 Java 8 之前，生成闭包行为的唯一方式就是内部类。在 Java 8 之后，我们可以使用 lambda 表达式来生成闭包行为，并且语法更加精细和简洁；你将会在 [函数式编程 ]() 这一章节中学习相关细节。即使应该优先使用 lambda 表达式用于内部类闭包，你依旧会看到那些 Java 8 以前的代码，即使用内部类来表示闭包的方式，所以非常有必要来理解这种形式。
 
 Java 最引人争议的问题之一就是，人们认为 Java 应该包含某种类似指针的机制，以允许回调（callback）。通过回调，对象能够携带一些信息，这些信息允许它在稍后的某个时刻调用初始的对象。稍后将会看到这是一个非常有用的概念。如果回调是通过指针实现的，那么就只能寄希望于程序员不会误用该指针。然而，读者应该已经了解到，Java 更小心仔细，所以没有在语言中包括指针。
 
@@ -1006,7 +988,7 @@ public class GreenhouseControls extends Controller {
     private boolean light = false;
     public class LightOn extends Event {
         public LightOn(long delayTime) {
-            super(delayTime); 
+            super(delayTime);
         }
         @Override
         public void action() {
@@ -1415,13 +1397,11 @@ Anonymous inner 9
 
 所以使用局部内部类而不使用匿名内部类的另一个理由就是，需要不止一个该内部类的对象。
 
-<!-- Inner-Class Identifiers -->
-
 ## 内部类标识符
 
 由于编译后每个类都会产生一个**.class** 文件，其中包含了如何创建该类型的对象的全部信息（此信息产生一个"meta-class"，叫做 **Class** 对象）。
 
-你可能猜到了，内部类也必须生成一个**.class** 文件以包含它们的 **Class** 对象信息。这些类文件的命名有严格的规则：外围类的名字，加上“**$**"，再加上内部类的名字。例如，**LocalInnerClass.java** 生成的 **.class** 文件包括：
+你可能猜到了，内部类也必须生成一个**.class** 文件以包含它们的 **Class** 对象信息。这些类文件的命名有严格的规则：外围类的名字，加上“**\$**"，再加上内部类的名字。例如，**LocalInnerClass.java** 生成的 **.class** 文件包括：
 
 ```java
 Counter.class
@@ -1430,20 +1410,10 @@ LocalInnerClass$LocalCounter.class
 LocalInnerClass.class
 ```
 
-如果内部类是匿名的，编译器会简单地产生一个数字作为其标识符。如果内部类是嵌套在别的内部类之中，只需直接将它们的名字加在其外围类标识符与“**$**”的后面。
+如果内部类是匿名的，编译器会简单地产生一个数字作为其标识符。如果内部类是嵌套在别的内部类之中，只需直接将它们的名字加在其外围类标识符与“**\$**”的后面。
 
 虽然这种命名格式简单而直接，但它还是很健壮的，足以应对绝大多数情况。因为这是 java 的标准命名方式，所以产生的文件自动都是平台无关的。（注意，为了保证你的内部类能起作用，Java 编译器会尽可能地转换它们。）
 
-
-<!-- Summary -->
 ## 本章小结
 
-比起面向对象编程中其他的概念来，接口和内部类更深奥复杂，比如 C++ 就没有这些。将两者结合起来，同样能够解决 C++ 中的用多重继承所能解决的问题。然而，多重继承在 C++ 中被证明是相当难以使用的，相比较而言，Java 的接口和内部类就容易理解多了。
-
-虽然这些特性本身是相当直观的，但是就像多态机制一样，这些特性的使用应该是设计阶段考虑的问题。随着时间的推移，读者将能够更好地识别什么情况下应该使用接口，什么情况使用内部类，或者两者同时使用。但此时，读者至少应该已经完全理解了它们的语法和语义。
-
-当读者见到这些语言特性的实际应用时，就能最终理解它们了。
-
-<!-- 分页 -->
-
-<div style="page-break-after: always;"></div>
+虽然这些特性本身是相当直观的，但是就像多态机制一样，这些特性的使用应该是设计阶段考虑的问题。随着时间的推移，读者将能够更好地识别什么情况下应该使用接口，什么情况使用内部类，或者两者同时使用。

@@ -3,20 +3,19 @@
 <!-- File -->
 
 # 第十七章 文件
->在丑陋的 Java I/O 编程方式诞生多年以后，Java终于简化了文件读写的基本操作。
 
-这种"困难方式"的全部细节都在 [Appendix: I/O Streams](./Appendix-IO-Streams.md)。如果你读过这个部分，就会认同 Java 设计者毫不在意他们的使用者的体验这一观念。打开并读取文件对于大多数编程语言来是非常常用的，由于 I/O 糟糕的设计以至于
-很少有人能够在不依赖其他参考代码的情况下完成打开文件的操作。
+> 在丑陋的 Java I/O 编程方式诞生多年以后，Java 终于简化了文件读写的基本操作。
 
-好像 Java 设计者终于意识到了 Java 使用者多年来的痛苦，在 Java7 中对此引入了巨大的改进。这些新元素被放在 **java.nio.file** 包下面，过去人们通常把 **nio** 中的 **n** 理解为 **new** 即新的 **io**，现在更应该当成是 **non-blocking** 非阻塞 **io**(**io**就是*input/output输入/输出*)。**java.nio.file** 库终于将 Java 文件操作带到与其他编程语言相同的水平。最重要的是 Java8 新增的 streams 与文件结合使得文件操作编程变得更加优雅。我们将看一下文件操作的两个基本组件：
+这种"困难方式"的全部细节都在 [Appendix: I/O Streams](./Appendix-IO-Streams.md)。如果你读过这个部分，就会认同 Java 设计者毫不在意他们的使用者的体验。打开并读取文件对于大多数编程语言来是非常常用的，由于 I/O 糟糕的设计以至于很少有人能够在不依赖其他参考代码的情况下完成打开文件的操作。
+
+Java 设计者终于意识到了使用者的痛苦，在 Java7 中引入了巨大的改进。这些新元素放在 **java.nio.file** 包下，过去人们通常把 **nio** 中的 **n** 理解为 **new** 即新的 **io**，现在更应该当成是 **non-blocking** 非阻塞 **io** (**io**就是*input/output 输入/输出*)。Java8 新增的 streams 与文件结合使得文件操作编程变得更加优雅。我们将看一下文件操作的两个基本组件：
 
 1. 文件或者目录的路径；
 2. 文件本身。
 
-<!-- File and Directory Paths -->
 ## 文件和目录路径
 
-一个 **Path** 对象表示一个文件或者目录的路径，是一个跨操作系统（OS）和文件系统的抽象，目的是在构造路径时不必关注底层操作系统，代码可以在不进行修改的情况下运行在不同的操作系统上。**java.nio.file.Paths** 类包含一个重载方法 **static get()**，该方法接受一系列 **String** 字符串或一个*统一资源标识符*(URI)作为参数，并且进行转换返回一个 **Path** 对象：
+一个 **Path** 对象表示一个文件或者目录的路径，是一个跨操作系统（OS）和文件系统的抽象，目的是在构造路径时运行在不同的操作系统上。**java.nio.file.Paths** 类包含一个重载方法 **static get()**，该方法接受一系列 **String** 字符串或一个*统一资源标识符*(URI)作为参数，并且进行转换返回一个 **Path** 对象：
 
 ```java
 // files/PathInfo.java
@@ -121,17 +120,27 @@ true
 */
 ```
 
-我已经在这一章第一个程序的 **main()** 方法添加了第一行用于展示操作系统的名称，因此你可以看到不同操作系统之间存在哪些差异。理想情况下，差别会相对较小，并且使用 **/** 或者 **\\** 路径分隔符进行分隔。你可以看到我运行在Windows 10 上的程序输出。
+Path 对象的方法：
 
-当 **toString()** 方法生成完整形式的路径，你可以看到 **getFileName()** 方法总是返回当前文件名。
-通过使用 **Files** 工具类(我们接下类将会更多地使用它)，可以测试一个文件是否存在，测试是否是一个"普通"文件还是一个目录等等。"Nofile.txt"这个示例展示我们描述的文件可能并不在指定的位置；这样可以允许你创建一个新的路径。"PathInfo.java"存在于当前目录中，最初它只是没有路径的文件名，但它仍然被检测为"存在"。一旦我们将其转换为绝对路径，我们将会得到一个从"C:"盘(因为我们是在Windows机器下进行测试)开始的完整路径，现在它也拥有一个父路径。“真实”路径的定义在文档中有点模糊，因为它取决于具体的文件系统。例如，如果文件名不区分大小写，即使路径由于大小写的缘故而不是完全相同，也可能得到肯定的匹配结果。在这样的平台上，**toRealPath()** 将返回实际情况下的 **Path**，并且还会删除任何冗余元素。
+-   `toString()`: 返回路径形式
+-   `getFileName()`: 返回当前文件名
+-   `getParent()`: 返回当前父路径
+-   `getRoot()`: 返回根路径
+-   `isAbsolute()`: 是否是绝对路径
+-   `toRealPath()`: 返回实际的 Path，因为有的系统不区分路径或文件名大小写也能匹配上。
+-   `toFile()`: 向后兼容，返回文件或目录本身。
+-   `toUri()`: 将路径转为 uri
+-   `get(uri)`: 将 uri 转为 Path 对象
 
-这里你会看到 **URI** 看起来只能用于描述文件，实际上 **URI** 可以用于描述更多的东西；通过 [维基百科](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) 可以了解更多细节。现在我们成功地将 **URI** 转为一个 **Path** 对象。
+Files 工具类的方法：
 
-最后，你会在 **Path** 中看到一些有点欺骗的东西，这就是调用 **toFile()** 方法会生成一个 **File** 对象。听起来似乎可以得到一个类似文件的东西(毕竟被称为 **File** )，但是这个方法的存在仅仅是为了向后兼容。虽然看上去应该被称为"路径"，实际上却应该表示目录或者文件本身。这是个非常草率并且令人困惑的命名，但是由于 **java.nio.file** 的存在我们可以安全地忽略它的存在。
+-   `exists(Path)`: 判断文件是否存在
+-   `isRegularFile(Path)`: 判断是否是常规文件
+-   `isDirectory(Path)`: 判断是否是目录
 
 ### 选取路径部分片段
-**Path** 对象可以非常容易地生成路径的某一部分：
+
+**Path** 对象可以生成路径的一部分：
 
 ```java
 // files/PartsOfPaths.java
@@ -143,8 +152,8 @@ public class PartsOfPaths {
         Path p = Paths.get("PartsOfPaths.java").toAbsolutePath();
         for(int i = 0; i < p.getNameCount(); i++)
             System.out.println(p.getName(i));
-        System.out.println("ends with '.java': " +
-        p.endsWith(".java"));
+        System.out.println("ends with '.java': " + p.endsWith(".java"));
+        System.out.println("ends with 'PartsOfPaths.java': " + p.endsWith("PartsOfPaths.java"));
         for(Path pp : p) {
             System.out.print(pp + ": ");
             System.out.print(p.startsWith(pp) + " : ");
@@ -165,6 +174,7 @@ ExtractedExamples
 files
 PartsOfPaths.java
 ends with '.java': false
+ends with 'PartsOfPaths.java': true
 Users: false : false
 Bruce: false : false
 Documents: false : false
@@ -177,9 +187,11 @@ Starts with C:\ true
 */
 
 ```
-可以通过 **getName()** 来索引 **Path** 的各个部分，直到达到上限 **getNameCount()**。**Path** 也实现了 **Iterable** 接口，因此我们也可以通过增强的 for-each 进行遍历。请注意，即使路径以 **.java** 结尾，使用 **endsWith()** 方法也会返回 **false**。这是因为使用 **endsWith()** 比较的是整个路径部分，而不会包含文件路径的后缀。通过使用 **startsWith()** 和 **endsWith()** 也可以完成路径的遍历。但是我们可以看到，遍历 **Path** 对象并不包含根路径，只有使用 **startsWith()** 检测根路径时才会返回 **true**。
+
+可以通过 **getName()** 来索引 **Path** 的各个部分，直到达到上限 **getNameCount()**。**Path** 也实现了 **Iterable** 接口，因此我们也可以通过增强的 for-each 进行遍历。请注意，即使路径以 **.java** 结尾，使用 **endsWith()** 方法也会返回 **false**。这是因为使用 **endsWith()** 比较的是整个路径部分，而不会包含文件路径的后缀。我们可以看到，遍历 **Path** 对象并不包含根路径，只有使用 **startsWith()** 检测根路径时才会返回 **true**。
 
 ### 路径分析
+
 **Files** 工具类包含一系列完整的方法用于获得 **Path** 相关的信息。
 
 ```java
@@ -192,7 +204,7 @@ public class PathAnalysis {
         System.out.print(id + ": ");
         System.out.println(result);
     }
-    
+
     public static void main(String[] args) throws IOException {
         System.out.println(System.getProperty("os.name"));
         Path p = Paths.get("PathAnalysis.java").toAbsolutePath();
@@ -213,8 +225,7 @@ public class PathAnalysis {
         if(Files.isSymbolicLink(p))
             say("SymbolicLink", Files.readSymbolicLink(p));
         if(FileSystems.getDefault().supportedFileAttributeViews().contains("posix"))
-            say("PosixFilePermissions",
-        Files.getPosixFilePermissions(p));
+            say("PosixFilePermissions", Files.getPosixFilePermissions(p));
     }
 }
 
@@ -236,9 +247,11 @@ ContentType: null
 SymbolicLink: false
 */
 ```
+
 在调用最后一个测试方法 **getPosixFilePermissions()** 之前我们需要确认一下当前文件系统是否支持 **Posix** 接口，否则会抛出运行时异常。
 
 ### **Paths**的增减修改
+
 我们必须能通过对 **Path** 对象增加或者删除一部分来构造一个新的 **Path** 对象。我们使用 **relativize()** 移除 **Path** 的根路径，使用 **resolve()** 添加 **Path** 的尾路径(不一定是“可发现”的名称)。
 
 对于下面代码中的示例，我使用 **relativize()** 方法从所有的输出中移除根路径，部分原因是为了示范，部分原因是为了简化输出结果，这说明你可以使用该方法将绝对路径转为相对路径。
@@ -251,7 +264,7 @@ import java.io.IOException;
 
 public class AddAndSubtractPaths {
     static Path base = Paths.get("..", "..", "..").toAbsolutePath().normalize();
-    
+
     static void show(int id, Path result) {
         if(result.isAbsolute())
             System.out.println("(" + id + ")r " + base.relativize(result));
@@ -263,7 +276,7 @@ public class AddAndSubtractPaths {
             System.out.println(e);
         }
     }
-    
+
     public static void main(String[] args) {
         System.out.println(System.getProperty("os.name"));
         System.out.println(base);
@@ -324,12 +337,12 @@ C:\Users\Bruce\Documents\GitHub\onjava\
 ExtractedExamples\files\nonexistent
 */
 ```
+
 我还为 **toRealPath()** 添加了更多的测试，这是为了扩展和规则化，防止路径不存在时抛出运行时异常。
 
-<!-- Directories -->
-
 ## 目录
-**Files** 工具类包含大部分我们需要的目录操作和文件操作方法。出于某种原因，它们没有包含删除目录树相关的方法，因此我们将实现并将其添加到 **onjava** 库中。
+
+**Files** 工具类包含目录和文件操作方法。出于某种原因，它没有删除目录树的方法，因此我们将实现并将其添加到 **onjava** 库中。
 
 ```java
 // onjava/RmDir.java
@@ -347,7 +360,7 @@ public class RmDir {
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;
             }
-            
+
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 Files.delete(dir);
@@ -357,12 +370,13 @@ public class RmDir {
     }
 }
 ```
-删除目录树的方法实现依赖于 **Files.walkFileTree()**，"walking" 目录树意味着遍历每个子目录和文件。*Visitor* 设计模式提供了一种标准机制来访问集合中的每个对象，然后你需要提供在每个对象上执行的操作。
+
+删除目录树的方法实现依赖于 **Files.walkFileTree()**，"walking" 目录树意味着遍历每个子目录和文件。_Visitor_ 设计模式提供了一种标准机制来访问集合中的每个对象，然后你需要提供在每个对象上执行的操作。
 此操作的定义取决于实现的 **FileVisitor** 的四个抽象方法，包括：
 
-    1.  **preVisitDirectory()**：在访问目录中条目之前在目录上运行。 
-    2.  **visitFile()**：运行目录中的每一个文件。  
-    3.  **visitFileFailed()**：调用无法访问的文件。   
+    1.  **preVisitDirectory()**：在访问目录中条目之前在目录上运行。
+    2.  **visitFile()**：运行目录中的每一个文件。
+    3.  **visitFileFailed()**：调用无法访问的文件。
     4.  **postVisitDirectory()**：在访问目录中条目之后在目录上运行，包括所有的子目录。
 
 为了简化，**java.nio.file.SimpleFileVisitor** 提供了所有方法的默认实现。这样，在我们的匿名内部类中，我们只需要重写非标准行为的方法：**visitFile()** 和 **postVisitDirectory()** 实现删除文件和删除目录。两者都应该返回标志位决定是否继续访问(这样就可以继续访问，直到找到所需要的)。
@@ -378,19 +392,19 @@ public class Directories {
     static Path test = Paths.get("test");
     static String sep = FileSystems.getDefault().getSeparator();
     static List<String> parts = Arrays.asList("foo", "bar", "baz", "bag");
-    
+
     static Path makeVariant() {
         Collections.rotate(parts, 1);
         return Paths.get("test", String.join(sep, parts));
     }
-    
+
     static void refreshTestDir() throws Exception {
         if(Files.exists(test))
         RmDir.rmdir(test);
         if(!Files.exists(test))
         Files.createDirectory(test);
     }
-    
+
     public static void main(String[] args) throws Exception {
         refreshTestDir();
         Files.createFile(test.resolve("Hello.txt"));
@@ -408,7 +422,7 @@ public class Directories {
         System.out.println("*********");
         Files.walk(test).forEach(System.out::println);
     }
-    
+
     static void populateTestDir() throws Exception  {
         for(int i = 0; i < parts.size(); i++) {
             Path variant = makeVariant();
@@ -461,6 +475,7 @@ test\foo\bar\baz\bag\File.txt
 test\Hello.txt
 */
 ```
+
 首先，**refreshTestDir()** 用于检测 **test** 目录是否已经存在。若存在，则使用我们新工具类 **rmdir()** 删除其整个目录。检查是否 **exists** 是多余的，但我想说明一点，因为如果你对于已经存在的目录调用 **createDirectory()** 将会抛出异常。**createFile()** 使用参数 **Path** 创建一个空文件; **resolve()** 将文件名添加到 **test Path** 的末尾。
 
 我们尝试使用 **createDirectory()** 来创建多级路径，但是这样会抛出异常，因为这个方法只能创建单级路径。我已经将 **populateTestDir()** 作为一个单独的方法，因为它将在后面的例子中被重用。对于每一个变量 **variant**，我们都能使用 **createDirectories()** 创建完整的目录路径，然后使用此文件的副本以不同的目标名称填充该终端目录。然后我们使用 **createTempFile()** 生成一个临时文件。
@@ -472,7 +487,9 @@ test\Hello.txt
 <!-- File Systems -->
 
 ## 文件系统
-为了完整起见，我们需要一种方法查找文件系统相关的其他信息。在这里，我们使用静态的 **FileSystems** 工具类获取"默认"的文件系统，但你同样也可以在 **Path** 对象上调用 **getFileSystem()** 以获取创建该 **Path** 的文件系统。你可以获得给定 *URI* 的文件系统，还可以构建新的文件系统(对于支持它的操作系统)。
+
+为了完整起见，我们需要一种方法查找文件系统相关的其他信息。在这里，我们使用静态的 **FileSystems** 工具类获取"默认"的文件系统，但你同样也可以在 **Path** 对象上调用 **getFileSystem()** 以获取创建该 **Path** 的文件系统。你可以获得给定 _URI_ 的文件系统，还可以构建新的文件系统(对于支持它的操作系统)。
+
 ```java
 // files/FileSystemDemo.java
 import java.nio.file.*;
@@ -481,7 +498,7 @@ public class FileSystemDemo {
     static void show(String id, Object o) {
         System.out.println(id + ": " + o);
     }
-    
+
     public static void main(String[] args) {
         System.out.println(System.getProperty("os.name"));
         FileSystem fsys = FileSystems.getDefault();
@@ -514,11 +531,13 @@ sun.nio.fs.WindowsFileSystemProvider@6d06d69c
 File Attribute Views: [owner, dos, acl, basic, user]
 */
 ```
+
 一个 **FileSystem** 对象也能生成 **WatchService** 和 **PathMatcher** 对象，将会在接下来两章中详细讲解。
 
 <!-- Watching a Path -->
 
 ## 路径监听
+
 通过 **WatchService** 可以设置一个进程对目录中的更改做出响应。在这个例子中，**delTxtFiles()** 作为一个单独的任务执行，该任务将遍历整个目录并删除以 **.txt** 结尾的所有文件，**WatchService** 会对文件删除操作做出反应：
 
 ```java
@@ -531,7 +550,7 @@ import java.util.concurrent.*;
 
 public class PathWatcher {
     static Path test = Paths.get("test");
-    
+
     static void delTxtFiles() {
         try {
             Files.walk(test)
@@ -550,7 +569,7 @@ public class PathWatcher {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static void main(String[] args) throws Exception {
         Directories.refreshTestDir();
         Directories.populateTestDir();
@@ -624,7 +643,7 @@ public class TreeWatcher {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static void main(String[] args) throws Exception {
         Directories.refreshTestDir();
         Directories.populateTestDir();
@@ -649,6 +668,7 @@ evt.kind(): ENTRY_DELETE
 <!-- Finding Files -->
 
 ## 文件查找
+
 到目前为止，为了找到文件，我们一直使用相当粗糙的方法，在 `path` 上调用 `toString()`，然后使用 `string` 操作查看结果。事实证明，`java.nio.file` 有更好的解决方案：通过在 `FileSystem` 对象上调用 `getPathMatcher()` 获得一个 `PathMatcher`，然后传入您感兴趣的模式。模式有两个选项：`glob` 和 `regex`。`glob` 比较简单，实际上功能非常强大，因此您可以使用 `glob` 解决许多问题。如果您的问题更复杂，可以使用 `regex`，这将在接下来的 `Strings` 一章中解释。
 
 在这里，我们使用 `glob` 查找以 `.tmp` 或 `.txt` 结尾的所有 `Path`：
@@ -718,8 +738,8 @@ dir.tmp
 
 注意，在这两种情况下，输出中都会出现 `dir.tmp`，即使它是一个目录而不是一个文件。要只查找文件，必须像在最后 `files.walk()` 中那样对其进行筛选。
 
-<!-- Reading & Writing Files -->
 ## 文件读写
+
 此时，我们可以对路径和目录做任何事情。 现在让我们看一下操纵文件本身的内容。
 
 如果一个文件很“小”，也就是说“它运行得足够快且占用内存小”，那么 `java.nio.file.Files` 类中的实用程序将帮助你轻松读写文本和二进制文件。
@@ -763,7 +783,7 @@ import java.nio.file.*;
 public class Writing {
     static Random rand = new Random(47);
     static final int SIZE = 1000;
-    
+
     public static void main(String[] args) throws Exception {
         // Write bytes to a file:
         byte[] bytes = new byte[SIZE];
@@ -842,13 +862,6 @@ public class StreamInAndOut {
 
 因为我们在同一个块中执行所有操作，所以这两个文件都可以在相同的 try-with-resources 语句中打开。`PrintWriter` 是一个旧式的 `java.io` 类，允许你“打印”到一个文件，所以它是这个应用的理想选择。如果你看一下 `StreamInAndOut.txt`，你会发现它里面的内容确实是大写的。
 
-<!-- Summary -->
-
 ## 本章小结
-虽然本章对文件和目录操作做了相当全面的介绍，但是仍然有没被介绍的类库中的功能——一定要研究 `java.nio.file` 的 Javadocs，尤其是 `java.nio.file.Files` 这个类。
 
-Java 7 和 8 对于处理文件和目录的类库做了大量改进。如果您刚刚开始使用 Java，那么您很幸运。在过去，它令人非常不愉快，我确信 Java 设计者以前对于文件操作不够重视才没做简化。对于初学者来说这是一件很棒的事，对于教学者来说也一样。我不明白为什么花了这么长时间来解决这个明显的问题，但不管怎么说它被解决了，我很高兴。使用文件现在很简单，甚至很有趣，这是你以前永远想不到的。
-
-<!-- 分页 -->
-
-<div style="page-break-after: always;"></div>
+虽然本章对文件和目录操作做了相当全面的介绍，但是仍然有没被介绍的功能，一定要研究 `java.nio.file` 的 Javadocs，尤其是 `java.nio.file.Files` 这个类。
