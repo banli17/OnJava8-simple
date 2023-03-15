@@ -62,10 +62,6 @@
 
 ## 原书资料
 
-<div align="left">
-<img src="https://raw.githubusercontent.com/LingCoder/OnJava8/master/cover_small.jpg"  alt="cover_small"/>
- </div>
-
 - 作者: Bruce Eckel
 - ISBN: 9780981872520
 - 页数：2038
